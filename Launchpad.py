@@ -176,8 +176,7 @@ class Launchpad(ControlSurface):
 		self.schedule_message(5, self._update_hardware)
 
 	def handle_sysex(self, midi_bytes):
-		self.log_message("Bollocks2")
-		# MK2 has different challenge and params jim changed to 17 byte devcice ID response
+		# MK2 has different challenge and params jim changed to 17 byte device ID response
 		if len(midi_bytes) == 17 and midi_bytes[:8] == (240, 126, 1, 6, 2,0, 32, 41):
 					#response = long(midi_bytes[7])
 					#response += long(midi_bytes[8]) << 8
