@@ -38,7 +38,9 @@ class ClipSlotMK2(ClipSlotComponent):
 				ret["value"] = self._record_button_value
 				
 			if slot_or_clip.color != None:
-				Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column ))  
+				string_array = [ord(c) for c in slot_or_clip.name]
+				Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column )) 
+				button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column, len(slot_or_clip.name)) + tuple(string_array) + (247,));
 				ret["name"] = str(slot_or_clip.name)
 				ret["value"] = self._color_value(slot_or_clip.color)
 				if slot_or_clip.is_triggered:
