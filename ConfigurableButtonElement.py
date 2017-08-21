@@ -13,12 +13,14 @@ class ConfigurableButtonElement(ButtonElement):
 	default_states = {True: 'DefaultButton.On', False: 'DefaultButton.Off'}
 	send_depends_on_forwarding = False
 
-	def __init__(self, is_momentary, msg_type, channel, identifier, skin = None, default_states = None, control_surface = None, *a, **k):
+	def __init__(self, is_momentary, msg_type, channel, identifier ,row, column, skin = None, default_states = None, control_surface = None, *a, **k):
 		self._control_surface = control_surface
 		super(ConfigurableButtonElement, self).__init__(is_momentary, msg_type, channel, identifier, skin = skin, **k)
 		if default_states is not None:
 			self.default_states = default_states
 		self.states = dict(self.default_states)
+		self.row = row
+		self.column = column
 
 	@property
 	def _on_value(self):

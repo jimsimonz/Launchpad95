@@ -75,13 +75,13 @@ class Launchpad(ControlSurface):
 						midi_note = (81 - (10 * row)) + column
 					else:
 						midi_note = row * 16 + column
-					button = ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, midi_note, skin = self._skin, control_surface = self)
+					button = ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, midi_note,row,column, skin = self._skin, control_surface = self)
 					button.name = str(column) + '_Clip_' + str(row) + '_Button'
 					button_row.append(button)
 				matrix.add_row(tuple(button_row))
 
-			top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 104 + index, skin = self._skin) for index in range(8)]
-			side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, self._side_notes[index], skin = self._skin) for index in range(8)]
+			top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 104 + index,0,0, skin = self._skin) for index in range(8)]
+			side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, self._side_notes[index],0,0, skin = self._skin) for index in range(8)]
 			top_buttons[0].name = 'Bank_Select_Up_Button'
 			top_buttons[1].name = 'Bank_Select_Down_Button'
 			top_buttons[2].name = 'Bank_Select_Left_Button'
