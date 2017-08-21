@@ -115,7 +115,7 @@ class Launchpad(ControlSurface):
 			# and request update
 			self._selector.update()
 			if self._mk2_rgb:
-				self.log_message("LaunchPad95 (mk2) Loaded !")
+				self.log_message("LaunchPad95 (AliveInVR fork) Loaded !")
 			else:
 				self.log_message("LaunchPad95 Loaded !")
 
@@ -183,7 +183,7 @@ class Launchpad(ControlSurface):
 					#if response == Live.Application.encrypt_challenge2(self._challenge):
 						self._mk2_rgb = True
 						self.log_message("Challenge Response ok (mk2)")
-
+						self.log_message("AliveInVR detected")
 						self._suppress_send_midi = False
 						self.set_enabled(True)
 						self.init()

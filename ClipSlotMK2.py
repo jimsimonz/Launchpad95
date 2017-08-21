@@ -1,6 +1,6 @@
 from _Framework.ClipSlotComponent import ClipSlotComponent
 from _Framework.Util import in_range
-
+import Live
 class ClipSlotMK2(ClipSlotComponent):
 	
 	def update(self):
@@ -27,6 +27,7 @@ class ClipSlotMK2(ClipSlotComponent):
 			ret = {}
 			ret["value"] = 0
 			ret["channel"] = 0
+			ret["name"] = ""
 			track = self._clip_slot.canonical_parent
 			slot_or_clip = self._clip_slot.clip if self.has_clip() else self._clip_slot
 	
@@ -36,6 +37,8 @@ class ClipSlotMK2(ClipSlotComponent):
 				ret["value"] = self._record_button_value
 				
 			if slot_or_clip.color != None:
+				Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name))  
+				ret["name"] = str(slot_or_clip.name)
 				ret["value"] = self._color_value(slot_or_clip.color)
 				if slot_or_clip.is_triggered:
 					#ret["channel"] = 1 # blink me
