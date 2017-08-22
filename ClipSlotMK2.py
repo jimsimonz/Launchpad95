@@ -39,7 +39,7 @@ class ClipSlotMK2(ClipSlotComponent):
 				
 			if slot_or_clip.color != None:
 				string_array = [ord(c) for c in slot_or_clip.name]
-				Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column )) 
+				#Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column )) 
 				button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column, len(slot_or_clip.name)) + tuple(string_array) + (247,));
 				ret["name"] = str(slot_or_clip.name)
 				ret["value"] = self._color_value(slot_or_clip.color)
@@ -67,5 +67,5 @@ class ClipSlotMK2(ClipSlotComponent):
 						ret["value"] = self._recording_value
 					else:	
 						ret["value"] = self._started_value
-					
+				button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column,1) + (0, 247,));	
 			return ret
