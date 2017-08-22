@@ -59,10 +59,15 @@ class SpecialSessionComponent(SessionComponent):
 					track = tracks[i + self._track_offset]
 					if track != None:
 						self._osd.attribute_names[idx] = str(track.name)
-						Live.Base.log("SpecialSessionComponent- tracknames: " + str(track.name))    
+						string_array = [ord(c) for c in track.name]
+						#Live.Base.log("SpecialSessionComponent- tracknames: " + str(track.name))  
+						self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 51) + (i, len(track.name)) + tuple(string_array) + (247,))
 					else:
 						self._osd.attribute_names[idx] = " "
+						self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 51) + (i, 1) + (0, 247,))
 					self._osd.attributes[idx] = " "
+				else:
+					self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 51) + (i, 1) + (0, 247,))
 				idx += 1
 
 			self._osd.info[0] = " "
