@@ -124,10 +124,10 @@ class MainSelectorComponent(ModeSelectorComponent):
 		assert mode in range(self.number_of_modes()) # 8 for this script
 		if self._main_mode_index == mode:
 			if self._main_mode_index == 1: #user mode 1 and device controller and instrument mode
-				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) % 3
+				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) %  Settings.USER_MODE_WIDTH
 				self.update()
 			elif self._main_mode_index == 2: #user mode 2  and step sequencer
-				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) % 3
+				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) %  Settings.USER_MODE_WIDTH
 				self.update()
 			elif self._main_mode_index == 3: #Mixer mode
 				self.update()
@@ -157,7 +157,7 @@ class MainSelectorComponent(ModeSelectorComponent):
 		self._modes_buttons[0].set_on_off_values("Mode.Session.On","Mode.Session.Off")
 		self._modes_buttons[3].set_on_off_values("Mode.Mixer.On","Mode.Mixer.Off")
 		mode1 = self.getSkinName(Settings.USER_MODES[self._sub_mode_list[1]])
-		mode2 = self.getSkinName(Settings.USER_MODES[3 + self._sub_mode_list[2]])
+		mode2 = self.getSkinName(Settings.USER_MODES[ Settings.USER_MODE_WIDTH + self._sub_mode_list[2]])
 		self._modes_buttons[1].set_on_off_values("Mode."+mode1+".On","Mode."+mode1+".Off")
 		self._modes_buttons[2].set_on_off_values("Mode."+mode2+".On","Mode."+mode2+".Off")
 		
@@ -241,7 +241,7 @@ class MainSelectorComponent(ModeSelectorComponent):
 				self._mode_index = 0
 
 			elif self._main_mode_index == 1 or self._main_mode_index == 2:
-				self._setup_sub_mode(Settings.USER_MODES[ (self._main_mode_index-1) * 3 + self._sub_mode_list[self._main_mode_index] ] )
+				self._setup_sub_mode(Settings.USER_MODES[ (self._main_mode_index-1) *  Settings.USER_MODE_WIDTH + self._sub_mode_list[self._main_mode_index] ] )
 
 			elif self._main_mode_index == 3:
 				# mixer
