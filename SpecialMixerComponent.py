@@ -83,7 +83,8 @@ class SpecialMixerComponent(MixerComponent):
 				if idx < 8 and len(tracks) > i + self._track_offset:
 					track = tracks[i + self._track_offset]
 					if track != None:
-						self._osd.attribute_names[idx] = str(track.name)
+						#self._osd.attribute_names[idx] = str(track.name) removed as international characters make this throw
+						self._osd.attribute_names[idx] = " "
 					else:
 						self._osd.attribute_names[idx] = " "
 					self._osd.attributes[idx] = " "
