@@ -83,6 +83,8 @@ class InstrumentControllerComponent(CompoundComponent):
 			if Settings.INSTRUMENT__SAVE_SCALE != None and Settings.INSTRUMENT__SAVE_SCALE == "clip":  
 				self._scales.from_object(self._track_controller.selected_clip)
 			self._update_OSD()
+			#initialize selected track, otherwise on load track is unknown
+			self.on_selected_track_changed()
 					
 	def _set_feedback_velocity(self):
 		if self.song().session_record:
