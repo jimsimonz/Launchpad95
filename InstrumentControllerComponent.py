@@ -7,6 +7,7 @@ from itertools import imap
 from TrackControllerComponent import TrackControllerComponent
 from ScaleComponent import ScaleComponent,CIRCLE_OF_FIFTHS,MUSICAL_MODES,KEY_NAMES
 import Settings
+import base64
 
 class InstrumentControllerComponent(CompoundComponent):
 
@@ -413,6 +414,12 @@ class InstrumentControllerComponent(CompoundComponent):
 				# must be delayed.... self._scales.update_object_name(track)
 					
 			self.update()
+			#send selected track name to host
+			string_array_encoded = base64.b64encode(self._track_controller.selected_track.name.encode('UTF-16LE'))
+			string_array_as_bytes =  [ord(c) for c in string_array_encoded]
+			self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 52) + (0, len(string_array_as_bytes)) + tuple(string_array_as_bytes) + (247,))
+				
+			
 	
 	def on_selected_scene_changed(self):
 		if self._track_controller._implicit_arm:
