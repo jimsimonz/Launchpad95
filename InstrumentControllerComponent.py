@@ -59,6 +59,7 @@ class InstrumentControllerComponent(CompoundComponent):
 		self._on_session_record_changed.subject = self.song()
 		self._on_swing_amount_changed_in_live.subject = self.song()
 		self._note_repeat.set_enabled(False)
+		self.octave_map = {}
 
 	def set_enabled(self, enabled):
 		CompoundComponent.set_enabled(self, enabled)
@@ -84,9 +85,9 @@ class InstrumentControllerComponent(CompoundComponent):
 			if Settings.INSTRUMENT__SAVE_SCALE != None and Settings.INSTRUMENT__SAVE_SCALE == "clip":  
 				self._scales.from_object(self._track_controller.selected_clip)
 			self._update_OSD()
-			#initialize selected track, otherwise on load track is unknown
+			#initialize selected track, otherwise upon load, track is unknown
 			self.on_selected_track_changed()
-					
+
 	def _set_feedback_velocity(self):
 		if self.song().session_record:
 			self._control_surface._c_instance.set_feedback_velocity(self._recordind_feedback_velocity)
@@ -175,10 +176,20 @@ class InstrumentControllerComponent(CompoundComponent):
 			if ((not sender.is_momentary()) or (value is not 0)):
 				if self._can_scroll_octave_up():
 					self._scales._octave += 1
+					self._save_octave()
 					self.update()
 
 	def _can_scroll_octave_up(self):
 		return self._scales._octave < 10
+
+	def _save_octave(self):
+		self.octave_map[self._track_controller.selected_track] = self._scales._octave
+
+	def _restore_octave(self):
+		if self.octave_map.has_key(self._track_controller.selected_track):
+			self._scales._octave = self.octave_map[self._track_controller.selected_track]
+		else:
+			self._scales._octave = 3
 
 	# Transposes key one octave down 
 	def _scroll_octave_down(self, value, sender):
@@ -186,6 +197,7 @@ class InstrumentControllerComponent(CompoundComponent):
 			if ((not sender.is_momentary()) or (value is not 0)):
 				if self._can_scroll_octave_down():
 					self._scales._octave -= 1
+					self._save_octave() 
 					self.update()
 
 	def _can_scroll_octave_down(self):
@@ -348,7 +360,7 @@ class InstrumentControllerComponent(CompoundComponent):
 					self._octave_down_button.turn_off()
 
 			self._update_OSD()
-			self._control_surface.log_message("Swing Amount: " + str(self._swing_amount()))              
+			#self._control_surface.log_message("Swing Amount: " + str(self._swing_amount()))              
 
 	def set_osd(self, osd):
 		self._osd = osd
@@ -412,7 +424,7 @@ class InstrumentControllerComponent(CompoundComponent):
 			if Settings.INSTRUMENT__SAVE_SCALE != None and Settings.INSTRUMENT__SAVE_SCALE == "clip":  
 				self._scales.from_object(self._track_controller.selected_clip)
 				# must be delayed.... self._scales.update_object_name(track)
-					
+			self._restore_octave()
 			self.update()
 			#send selected track name to host
 			string_array_encoded = base64.b64encode(self._track_controller.selected_track.name.encode('UTF-16LE'))
