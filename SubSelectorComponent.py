@@ -23,7 +23,7 @@ class SubSelectorComponent(ModeSelectorComponent):
 		ModeSelectorComponent.__init__(self)
 		self._control_surface = control_surface
 		self._session = session
-		self._mixer = SpecialMixerComponent(matrix.width())
+		self._mixer = SpecialMixerComponent(control_surface, matrix.width())
 		self._matrix = matrix
 		self._sliders = []
 		self._mixer.name = 'Mixer'
