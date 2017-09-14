@@ -167,7 +167,7 @@ class Colors:
 				On =  Rgb.PURPLE
 				Off = Rgb.PURPLE_THIRD
 		class LoopSelector:
-			SelectedPlaying = Rgb.PURPLE
+			SelectedPlaying = Rgb.GREEN
 			Playing = Rgb.PURPLE_HALF
 			Selected = Rgb.BLUE
 			InLoop = Rgb.BLUE_THIRD
@@ -181,7 +181,7 @@ class Colors:
 				On = Rgb.GREEN
 				Off = Rgb.GREEN_THIRD
 			Selected = Rgb.GREEN
-			Playing = Rgb.RED
+			Playing = Rgb.PURPLE
 		class NoteEditor:
 			class VelocityShifted:
 				On = Rgb.AMBER
@@ -191,7 +191,7 @@ class Colors:
 			Velocity2 = Rgb.GREEN
 			Velocity3 = Rgb.GREEN_THIRD
 			Muted = Rgb.DARK_GREY
-			Playing = Rgb.RED
+			Playing = Rgb.PURPLE
 			Metronome = Rgb.BLUE
 			NoteMarker = Rgb.AMBER
 			PageMarker = Rgb.YELLOW
@@ -219,7 +219,7 @@ class Colors:
 		class NoteEditor:
 			MetronomeInPage = Rgb.BLUE
 			MetronomeInOtherPage = Rgb.BLUE_THIRD
-			PlayInPage = Rgb.RED
+			PlayInPage = Rgb.PURPLE
 			PlayInOtherPage = Rgb.RED_THIRD
 			
 	class Recording:
