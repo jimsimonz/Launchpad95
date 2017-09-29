@@ -8,11 +8,20 @@ from TrackControllerComponent import TrackControllerComponent
 from ScaleComponent import ScaleComponent,CIRCLE_OF_FIFTHS,MUSICAL_MODES,KEY_NAMES
 import Settings
 import base64
+from _Framework.InputControlElement import InputControlElement
+from _Framework.InputControlElement import MIDI_CC_TYPE, MIDI_NOTE_TYPE
 
 class InstrumentControllerComponent(CompoundComponent):
 
 	def __init__(self, matrix, side_buttons, top_buttons, control_surface, note_repeat):
 		super(InstrumentControllerComponent, self).__init__()
+		
+		self._macro_controllers = []
+
+		for i in xrange(8):
+			self._macro_controllers.append(InputControlElement(MIDI_CC_TYPE, 1, 30 + i))
+			self._macro_controllers[i].message_map_mode = self.message_map_mode
+
 		self._control_surface = control_surface
 		self._note_repeat = note_repeat
 		self._osd = None
@@ -26,6 +35,7 @@ class InstrumentControllerComponent(CompoundComponent):
 		self._normal_feedback_velocity = int(self._control_surface._skin['Note.Feedback'])
 		self._recordind_feedback_velocity = int(self._control_surface._skin['Note.FeedbackRecord'])
 		self._drum_group_device = None
+		self._instrument_device = None
 		self._octave_up_button = None
 		self._octave_down_button = None
 		self._scales_toggle_button = None
@@ -60,6 +70,9 @@ class InstrumentControllerComponent(CompoundComponent):
 		self._on_swing_amount_changed_in_live.subject = self.song()
 		self._note_repeat.set_enabled(False)
 		self.octave_map = {}
+
+	def message_map_mode(self):
+		return Live.MidiMap.MapMode.absolute
 
 	def set_enabled(self, enabled):
 		CompoundComponent.set_enabled(self, enabled)
@@ -413,6 +426,18 @@ class InstrumentControllerComponent(CompoundComponent):
 	def on_selected_track_changed(self):
 		if self._track_controller._implicit_arm:
 			self._get_drumrack_device()
+
+			if self._instrument_device != None:
+				parameters = self._instrument_device._get_parameters()
+				index = 0
+				for val in parameters:
+					#ignore first param which is device on
+					if index > 0:
+						self._macro_controllers[index-1].connect_to(val)
+						if index == len(self._macro_controllers):
+							break
+					index = index + 1
+
 			if self._drum_group_device != None:
 				self._scales.set_drumrack(True)
 			else:
@@ -451,12 +476,14 @@ class InstrumentControllerComponent(CompoundComponent):
 				device = self.find_drum_group_device(track)
 				if(device != None and device.can_have_drum_pads and device.has_drum_pads):
 					self._drum_group_device = device
+					self._instrument_device = None
 				else:
 					self._drum_group_device = None
+					self._instrument_device = self.find_instrument_device(track)
 			else:
-				self._drum_group_device = None
+				self._instrument_device = self._drum_group_device = None
 		else:
-			self._drum_group_device = None
+			self._instrument_device = self._drum_group_device = None
 	
 	#Return the drum device inside the track devices or inside the track chain or None if device is not a Drum
 	def find_drum_group_device(self, track):
@@ -468,7 +495,10 @@ class InstrumentControllerComponent(CompoundComponent):
 				return find_if(bool, imap(self.find_drum_group_device, device.chains))
 		else:
 			return None
-			
+	
+	def find_instrument_device(self, track):
+		return find_if(lambda d: d.type == Live.Device.DeviceType.instrument, track.devices)
+
 	def _update_matrix(self):
 		if not self.is_enabled() or not self._matrix or self._scales.is_enabled():
 			self._control_surface.release_controlled_track()
