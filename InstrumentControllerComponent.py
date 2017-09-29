@@ -497,7 +497,13 @@ class InstrumentControllerComponent(CompoundComponent):
 			return None
 	
 	def find_instrument_device(self, track):
-		return find_if(lambda d: d.type == Live.Device.DeviceType.instrument, track.devices)
+		device = find_if(lambda d: d.type == Live.Device.DeviceType.instrument, track.devices)
+		if device == None:
+			device = find_if(lambda d: d.type == Live.Device.DeviceType.audio_effect, track.devices)
+		if device == None:
+			device = find_if(lambda d: d.type == Live.Device.DeviceType.midi_effect, track.devices)
+		return device
+		
 
 	def _update_matrix(self):
 		if not self.is_enabled() or not self._matrix or self._scales.is_enabled():
