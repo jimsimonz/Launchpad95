@@ -19,7 +19,7 @@ class InstrumentControllerComponent(CompoundComponent):
 		self._macro_controllers = []
 
 		for i in xrange(8):
-			self._macro_controllers.append(InputControlElement(MIDI_CC_TYPE, 1, 30 + i))
+			self._macro_controllers.append(InputControlElement(MIDI_CC_TYPE, 1, 20 + i))
 			self._macro_controllers[i].message_map_mode = self.message_map_mode
 
 		self._control_surface = control_surface
