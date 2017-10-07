@@ -39,10 +39,14 @@ class ClipSlotMK2(ClipSlotComponent):
 				ret["value"] = self._record_button_value
 				
 			if slot_or_clip.color != None:
-				string_array_encoded = base64.b64encode(slot_or_clip.name.encode('UTF-16LE'))
-				string_array_as_bytes = [ord(c) for c in string_array_encoded]
-				#Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column )) 
-				button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column, len(string_array_as_bytes)) + tuple(string_array_as_bytes) + (247,));
+				if self.has_clip():
+					string_array_encoded = base64.b64encode(slot_or_clip.name.encode('UTF-16LE'))
+					string_array_as_bytes = [ord(c) for c in string_array_encoded]
+					#Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column )) 
+					button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column, len(string_array_as_bytes)) + tuple(string_array_as_bytes) + (247,));
+				else:
+					button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column,1) + (0, 247,))
+
 				ret["value"] = self._color_value(slot_or_clip.color)
 				if slot_or_clip.is_triggered:
 					#ret["channel"] = 1 # blink me
@@ -68,5 +72,5 @@ class ClipSlotMK2(ClipSlotComponent):
 						ret["value"] = self._recording_value
 					else:	
 						ret["value"] = self._started_value
-				button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column,1) + (0, 247,));	
+				button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column,1) + (0, 247,))	
 			return ret
