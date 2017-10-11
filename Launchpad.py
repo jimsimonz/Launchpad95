@@ -178,27 +178,18 @@ class Launchpad(ControlSurface):
 	def handle_sysex(self, midi_bytes):
 		# MK2 has different challenge and params jim changed to 17 byte device ID response
 		if len(midi_bytes) == 17 and midi_bytes[:8] == (240, 126, 1, 6, 2,0, 32, 41):
-					#response = long(midi_bytes[7])
-					#response += long(midi_bytes[8]) << 8
-					#if response == Live.Application.encrypt_challenge2(self._challenge):
 						self._mk2_rgb = True
 						self.log_message("Challenge Response ok (mk2)")
 						self.log_message("AliveInVR detected")
 						self._suppress_send_midi = False
 						self.set_enabled(True)
 						self.init()
-		#MK1 Challenge
-		elif len(midi_bytes) == 8 and midi_bytes[1:5] == (0, 32, 41, 6):
-					response = long(midi_bytes[5])
-					response += long(midi_bytes[6]) << 8
-					if response == Live.Application.encrypt_challenge2(self._challenge):
-						self.log_message("Challenge Response ok (mk1)")
-						self._mk2_rgb = False
-						self.init()
-						self._suppress_send_midi = False
-						self.set_enabled(True)
 		else:
-			ControlSurface.handle_sysex(self,midi_bytes)
+			if len(midi_bytes) == 17 and midi_bytes[:8] == (240, 126, 1, 6, 2,0, 32, 61):
+				song = self.song()
+				song.stop_all_clips(False)
+			else:
+				ControlSurface.handle_sysex(self,midi_bytes)
 
 
 	def build_midi_map(self, midi_map_handle):
