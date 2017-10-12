@@ -124,12 +124,6 @@ class Launchpad(ControlSurface):
 		song.add_is_playing_listener(self._is_playing_listener)
 		song.add_metronome_listener(self._metronome_listener)
 		song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
-		#send initial states 
-		self._record_mode_listener()
-		self._is_playing_listener()
-		self._metronome_listener()
-		self._midi_recording_quantization_listener()
-	
 
 	def disconnect(self):
 		self._suppress_send_midi = True
@@ -196,6 +190,8 @@ class Launchpad(ControlSurface):
 						self._suppress_send_midi = False
 						self.set_enabled(True)
 						self.init()
+						#send initial states 
+						self._report_all_transport_states()
 		else:
 			if len(midi_bytes) == 17 and midi_bytes[:8] == (240, 126, 1, 6, 2,0, 32, 61):
 				self.handle_aliveinvr_sysex_command(midi_bytes)
@@ -312,7 +308,7 @@ class Launchpad(ControlSurface):
 		self._note_repeat.set_note_repeat(self._c_instance.note_repeat)
 
 	def _report_transport_state(self, mode, value):
-		self._send_midi((240, 0, 32, 41, 2, 24, 60) + (self.ALIVEINVR_SYSEX_COMMAND.TRANSPORT, mode, value) + (247,))
+		ControlSurface._send_midi(self, (240, 0, 32, 41, 2, 24, 60) + (self.ALIVEINVR_SYSEX_COMMAND.TRANSPORT, mode, value) + (247,), None)
 				
 	def _record_mode_listener(self):
 		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.RECORD_ALL, self.song().record_mode)
@@ -326,3 +322,8 @@ class Launchpad(ControlSurface):
 	def _midi_recording_quantization_listener(self):
 		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.RECORD_QUANTIZE,self.song().midi_recording_quantization)
 	
+	def _report_all_transport_states(self):
+		self._record_mode_listener()
+		self._is_playing_listener()
+		self._metronome_listener()
+		self._midi_recording_quantization_listener()
