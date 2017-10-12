@@ -186,10 +186,46 @@ class Launchpad(ControlSurface):
 						self.init()
 		else:
 			if len(midi_bytes) == 17 and midi_bytes[:8] == (240, 126, 1, 6, 2,0, 32, 61):
-				song = self.song()
-				song.stop_all_clips(False)
+				self.handle_aliveinvr_sysex_command(midi_bytes)
 			else:
 				ControlSurface.handle_sysex(self,midi_bytes)
+
+		
+	def handle_aliveinvr_transport_command(self, command, value):
+		class ALIVEINVR_SYSEX_TRANSPORT_COMMAND:
+			STOP_ALL_CLIPS = 0
+			PLAY = 1
+			STOP = 2
+			RECORD_ALL = 3
+			METRONOME_TOGGLE = 4
+			RECORD_QUANTIZE = 5
+	
+		CommandLookup = ALIVEINVR_SYSEX_TRANSPORT_COMMAND()
+		
+		song = self.song()
+		if command == CommandLookup.STOP_ALL_CLIPS:
+			song.stop_all_clips(False)
+		elif command == CommandLookup.PLAY:
+			song.start_playing()
+		elif command == CommandLookup.STOP:
+			song.stop_playing()
+		elif command == CommandLookup.RECORD_ALL:
+			song.record_mode = not song.record_mode
+		elif command == CommandLookup.METRONOME_TOGGLE:
+			song.metronome = not song.metronome
+		elif command == CommandLookup.RECORD_QUANTIZE_TOGGLE:
+			song.midi_recording_quantization = value
+
+
+	def handle_aliveinvr_sysex_command(self, midi_bytes):
+		#first 8 bytes is header
+		#byte 9 message type
+		#rest are data depending on message type
+		class ALIVEINVR_SYSEX_COMMAND:
+			TRANSPORT = 0
+
+		if midi_bytes[8] == ALIVEINVR_SYSEX_COMMAND.TRANSPORT:
+			self.handle_aliveinvr_transport_command(midi_bytes[9], midi_bytes[10])
 
 
 	def build_midi_map(self, midi_map_handle):
