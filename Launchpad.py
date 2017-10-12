@@ -124,6 +124,12 @@ class Launchpad(ControlSurface):
 		song.add_is_playing_listener(self._is_playing_listener)
 		song.add_metronome_listener(self._metronome_listener)
 		song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
+		#send initial states 
+		self._record_mode_listener()
+		self._is_playing_listener()
+		self._metronome_listener()
+		self._midi_recording_quantization_listener()
+	
 
 	def disconnect(self):
 		self._suppress_send_midi = True
