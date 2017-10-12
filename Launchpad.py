@@ -118,6 +118,12 @@ class Launchpad(ControlSurface):
 				self.log_message("LaunchPad95 (AliveInVR fork) Loaded !")
 			else:
 				self.log_message("LaunchPad95 Loaded !")
+		
+		song = self.song()
+		song.add_record_mode_listener(self._record_mode_listener)
+		song.add_is_playing_listener(self._is_playing_listener)
+		song.add_metronome_listener(self._metronome_listener)
+		song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
 
 	def disconnect(self):
 		self._suppress_send_midi = True
@@ -190,9 +196,7 @@ class Launchpad(ControlSurface):
 			else:
 				ControlSurface.handle_sysex(self,midi_bytes)
 
-		
-	def handle_aliveinvr_transport_command(self, command, value):
-		class ALIVEINVR_SYSEX_TRANSPORT_COMMAND:
+	class ALIVEINVR_SYSEX_TRANSPORT_COMMAND:
 			STOP_ALL_CLIPS = 0
 			PLAY = 1
 			STOP = 2
@@ -200,7 +204,12 @@ class Launchpad(ControlSurface):
 			METRONOME_TOGGLE = 4
 			RECORD_QUANTIZE = 5
 	
-		CommandLookup = ALIVEINVR_SYSEX_TRANSPORT_COMMAND()
+	class ALIVEINVR_SYSEX_COMMAND:
+			TRANSPORT = 0
+
+	def handle_aliveinvr_transport_command(self, command, value):
+		
+		CommandLookup = self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND()
 		
 		song = self.song()
 		if command == CommandLookup.STOP_ALL_CLIPS:
@@ -213,7 +222,7 @@ class Launchpad(ControlSurface):
 			song.record_mode = not song.record_mode
 		elif command == CommandLookup.METRONOME_TOGGLE:
 			song.metronome = not song.metronome
-		elif command == CommandLookup.RECORD_QUANTIZE_TOGGLE:
+		elif command == CommandLookup.RECORD_QUANTIZE:
 			song.midi_recording_quantization = value
 
 
@@ -221,10 +230,8 @@ class Launchpad(ControlSurface):
 		#first 8 bytes is header
 		#byte 9 message type
 		#rest are data depending on message type
-		class ALIVEINVR_SYSEX_COMMAND:
-			TRANSPORT = 0
-
-		if midi_bytes[8] == ALIVEINVR_SYSEX_COMMAND.TRANSPORT:
+	
+		if midi_bytes[8] == self.ALIVEINVR_SYSEX_COMMAND.TRANSPORT:
 			self.handle_aliveinvr_transport_command(midi_bytes[9], midi_bytes[10])
 
 
@@ -297,3 +304,19 @@ class Launchpad(ControlSurface):
 		self._note_repeat = NoteRepeatComponent(name='Note_Repeat')
 		self._note_repeat.set_enabled(False)
 		self._note_repeat.set_note_repeat(self._c_instance.note_repeat)
+
+	def _report_transport_state(self, mode, value):
+		self._send_midi((240, 0, 32, 41, 2, 24, 60) + (self.ALIVEINVR_SYSEX_COMMAND.TRANSPORT, mode, value) + (247,))
+				
+	def _record_mode_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.RECORD_ALL, self.song().record_mode)
+	
+	def _is_playing_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.PLAY, self.song().is_playing)
+	
+	def _metronome_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.METRONOME_TOGGLE,self.song().metronome)
+	
+	def _midi_recording_quantization_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.RECORD_QUANTIZE,self.song().midi_recording_quantization)
+	
