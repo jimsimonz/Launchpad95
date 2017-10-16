@@ -24,11 +24,12 @@ class Launchpad(ControlSurface):
 		self._live_bugfix_version = live.get_bugfix_version()
 		self._selector = None #needed because update hardware is called.
 		self._mk2_rgb = False
+		self.fixed_mode = False
 		with self.component_guard():
 			self._suppress_send_midi = True
 			self._suppress_session_highlight = True
-			self._suggested_input_port = ("Launchpad", "Launchpad Mini", "Launchpad S", "Launchpad MK2")
-			self._suggested_output_port = ("Launchpad", "Launchpad Mini", "Launchpad S", "Launchpad MK2")
+			self._suggested_input_port = ("InToLive")
+			self._suggested_output_port = ("OutOfLive")
 			self._control_is_with_automap = False
 			self._user_byte_write_button = None
 			self._config_button = None
@@ -124,6 +125,7 @@ class Launchpad(ControlSurface):
 		song.add_is_playing_listener(self._is_playing_listener)
 		song.add_metronome_listener(self._metronome_listener)
 		song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
+		song.add_session_automation_record_listener(self._session_automation_record_listener)
 
 	def disconnect(self):
 		self._suppress_send_midi = True
@@ -205,6 +207,13 @@ class Launchpad(ControlSurface):
 			RECORD_ALL = 3
 			METRONOME_TOGGLE = 4
 			RECORD_QUANTIZE = 5
+			DUPLICATE = 6
+			NEW = 7
+			FIXED = 8
+			AUTOMATION_REC = 9
+			UNDO = 10
+			REDO = 11
+			SESSION_RECORD = 12
 	
 	class ALIVEINVR_SYSEX_COMMAND:
 			TRANSPORT = 0
@@ -226,6 +235,21 @@ class Launchpad(ControlSurface):
 			song.metronome = not song.metronome
 		elif command == CommandLookup.RECORD_QUANTIZE:
 			song.midi_recording_quantization = value
+		elif command == CommandLookup.DUPLICATE:
+			song.capture_and_insert_scene()
+		elif command == CommandLookup.NEW:
+			song.capture_and_insert_scene(Live.Song.CaptureMode.all_except_selected)
+		elif command == CommandLookup.FIXED:
+			self.fixed_mode = not self.fixed_mode
+			self._is_fixed_record_listener()
+		elif command == CommandLookup.AUTOMATION_REC:
+			song.session_automation_record = not song.session_automation_record
+		elif command == CommandLookup.UNDO:
+			song.undo()
+		elif command == CommandLookup.REDO:
+			song.redo()
+		elif command == CommandLookup.SESSION_RECORD:
+			self._selector._instrument_controller._track_controller._toggle_record_session()
 
 
 	def handle_aliveinvr_sysex_command(self, midi_bytes):
@@ -322,8 +346,16 @@ class Launchpad(ControlSurface):
 	def _midi_recording_quantization_listener(self):
 		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.RECORD_QUANTIZE,self.song().midi_recording_quantization)
 	
+	def _session_automation_record_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.AUTOMATION_REC,self.song().session_automation_record)
+
+	def _is_fixed_record_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.FIXED,self.fixed_mode)
+
 	def _report_all_transport_states(self):
 		self._record_mode_listener()
 		self._is_playing_listener()
 		self._metronome_listener()
 		self._midi_recording_quantization_listener()
+		self._session_automation_record_listener()
+		self._is_fixed_record_listener()

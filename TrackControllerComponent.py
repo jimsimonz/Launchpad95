@@ -1,8 +1,10 @@
 
 from _Framework.MixerComponent import MixerComponent
 from _Framework.ButtonElement import ButtonElement
-import time
+from _Framework.ClipCreator import ClipCreator
 
+import time
+import Live
 
 class TrackControllerComponent(MixerComponent):
 
@@ -238,7 +240,7 @@ class TrackControllerComponent(MixerComponent):
 					self.song().view.selected_scene = self.song().scenes[self.selected_scene_idx + 1]			
 
 
-# PREV SCENE			
+# Session record			
 	def _session_record_value(self, value):
 		assert (self._session_record_button != None)
 		assert (value in range(128))
@@ -263,11 +265,7 @@ class TrackControllerComponent(MixerComponent):
 						self._control_surface.show_message("metronome : off")
 				else:
 					if self._implicit_arm:
-						self.song().session_record = not self.song().session_record
-						if self.song().session_record :
-							self._control_surface.show_message("session record : on")
-						else:
-							self._control_surface.show_message("session record : off")
+						self._toggle_record_session()
 					else:
 						if self.selected_track.can_be_armed:
 							self.selected_track.arm = not self.selected_track.arm
@@ -276,6 +274,24 @@ class TrackControllerComponent(MixerComponent):
 							else:
 								self._control_surface.show_message("track "+str(self.selected_track.name)+" unarmed")
 					self.update()
+
+	def _toggle_record_session(self):
+	#if going into record and fixed mode, create an empty clip
+		if self.song().session_record == False:
+			if self.selected_scene != None:
+				slot = self.selected_scene.clip_slots[self.selected_track_idx]
+				if slot != None:
+					if self._control_surface.fixed_mode == True:
+						if slot.clip == None:
+							Creator = ClipCreator()
+							Creator.create(slot,None)
+
+		self._control_surface.log_message("Session record implicit")
+		self.song().session_record = not self.song().session_record
+		if self.song().session_record :
+			self._control_surface.show_message("session record : on")
+		else:
+			self._control_surface.show_message("session record : off")
 
 	def _play_value(self, value):
 		assert (self._play_button != None)
@@ -427,6 +443,9 @@ class TrackControllerComponent(MixerComponent):
 				else:
 					self._undo_button.turn_off()
 
+			self._control_surface._report_transport_state(self._control_surface.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.UNDO,self.song().can_undo)
+			self._control_surface._report_transport_state(self._control_surface.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.REDO,self.song().can_redo)
+			
 			if self._solo_button != None:
 				self._solo_button.set_on_off_values("TrackController.Solo")
 				if self.selected_track.solo:
