@@ -126,6 +126,7 @@ class Launchpad(ControlSurface):
 		song.add_metronome_listener(self._metronome_listener)
 		song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
 		song.add_session_automation_record_listener(self._session_automation_record_listener)
+		song.add_session_record_listener(self._session_record_listener)
 
 	def disconnect(self):
 		self._suppress_send_midi = True
@@ -210,7 +211,7 @@ class Launchpad(ControlSurface):
 			DUPLICATE = 6
 			NEW = 7
 			FIXED = 8
-			AUTOMATION_REC = 9
+			AUTOMATION_RECORD = 9
 			UNDO = 10
 			REDO = 11
 			SESSION_RECORD = 12
@@ -242,7 +243,7 @@ class Launchpad(ControlSurface):
 		elif command == CommandLookup.FIXED:
 			self.fixed_mode = not self.fixed_mode
 			self._is_fixed_record_listener()
-		elif command == CommandLookup.AUTOMATION_REC:
+		elif command == CommandLookup.AUTOMATION_RECORD:
 			song.session_automation_record = not song.session_automation_record
 		elif command == CommandLookup.UNDO:
 			song.undo()
@@ -347,7 +348,10 @@ class Launchpad(ControlSurface):
 		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.RECORD_QUANTIZE,self.song().midi_recording_quantization)
 	
 	def _session_automation_record_listener(self):
-		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.AUTOMATION_REC,self.song().session_automation_record)
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.AUTOMATION_RECORD,self.song().session_automation_record)
+
+	def _session_record_listener(self):
+		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.SESSION_RECORD,self.song().session_record)
 
 	def _is_fixed_record_listener(self):
 		self._report_transport_state(self.ALIVEINVR_SYSEX_TRANSPORT_COMMAND.FIXED,self.fixed_mode)
@@ -359,3 +363,4 @@ class Launchpad(ControlSurface):
 		self._midi_recording_quantization_listener()
 		self._session_automation_record_listener()
 		self._is_fixed_record_listener()
+		self._session_record_listener()
