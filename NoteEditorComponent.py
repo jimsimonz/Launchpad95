@@ -344,7 +344,7 @@ class NoteEditorComponent(ControlSurfaceComponent):
 		if self.is_enabled() and self._clip == None:
 			self._stepsequencer.create_clip()
 
-		elif self.is_enabled() and self._clip != None:
+		if self.is_enabled() and self._clip != None:
 			if value != 0 or not is_momentary: #if NOTE_ON or button is toggle
 				if(self._is_velocity_shifted):
 					self._velocity_notes_pressed = self._velocity_notes_pressed + 1 #Just changing some note velocity
