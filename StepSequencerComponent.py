@@ -220,51 +220,47 @@ class NoteSelectorComponent(ControlSurfaceComponent):
     def _update_matrix(self):
         if self._enable_offset_button and self.is_enabled():
             for i in range(len(self._offset_buttons)):
-                if self._clip == None:
-                    self._offset_buttons[i].set_light("DefaultButton.Disabled")
-                    self._offset_buttons[i].set_enabled(True)
-                else:
-                    note = self._root_note + i
-                    if self.is_drumrack:
-                        if self._drum_group_device.drum_pads[note].chains:
-                            self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected","DrumGroup.PadFilled")
-                        else:
-                            self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected", "DrumGroup.PadEmpty")
+                note = self._root_note + i
+                if self.is_drumrack:
+                    if self._drum_group_device.drum_pads[note].chains:
+                        self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected","DrumGroup.PadFilled")
                     else:
-                        if self._scale != None:
-                            if i % 12 == self._scale[0]:
-                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Root")
-                            elif i % 12 == self._scale[2] or i % 12 == self._scale[4]:
-                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Highlight")
-                            elif self._scale != None and i % 12 in self._scale:
-                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.InScale")
-                            else:
-                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.OutOfScale")
+                        self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected", "DrumGroup.PadEmpty")
+                else:
+                    if self._scale != None:
+                        if i % 12 == self._scale[0]:
+                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Root")
+                        elif i % 12 == self._scale[2] or i % 12 == self._scale[4]:
+                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Highlight")
+                        elif self._scale != None and i % 12 in self._scale:
+                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.InScale")
                         else:
                             self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.OutOfScale")
-
-                    if self._is_velocity_shifted and not self._step_sequencer._is_locked:
-                        #self._offset_buttons[i].force_next_send()
-                        #self._offset_buttons[i].turn_off()
-                        self._offset_buttons[i].set_enabled(False)
-                        self._offset_buttons[i].set_channel(11)
-                        self._offset_buttons[i].set_identifier(note)
                     else:
-                        #self._offset_buttons[i].force_next_send()
-                        self._offset_buttons[i].set_enabled(True)
-                        self._offset_buttons[i].use_default_message()
+                        self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.OutOfScale")
 
-                        if self._playhead != None and self.note_is_playing(self._clip, self._note_cache, note, self._playhead):
-                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Playing","StepSequencer.NoteSelector.Playing")
+                if self._is_velocity_shifted and not self._step_sequencer._is_locked:
+                    #self._offset_buttons[i].force_next_send()
+                    #self._offset_buttons[i].turn_off()
+                    self._offset_buttons[i].set_enabled(False)
+                    self._offset_buttons[i].set_channel(11)
+                    self._offset_buttons[i].set_identifier(note)
+                else:
+                    #self._offset_buttons[i].force_next_send()
+                    self._offset_buttons[i].set_enabled(True)
+                    self._offset_buttons[i].use_default_message()
 
-                    if self.selected_note == note:
-                        if self._cache[i] != self._offset_buttons[i]._on_value or self._force:
-                            self._offset_buttons[i].turn_on()
-                            self._cache[i] = self._offset_buttons[i]._on_value
-                    else:
-                        if self._cache[i] != self._offset_buttons[i]._off_value or self._force:
-                            self._offset_buttons[i].turn_off()
-                            self._cache[i] = self._offset_buttons[i]._off_value
+                    if self._playhead != None and self.note_is_playing(self._clip, self._note_cache, note, self._playhead):
+                        self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Playing","StepSequencer.NoteSelector.Playing")
+
+                if self.selected_note == note:
+                    if self._cache[i] != self._offset_buttons[i]._on_value or self._force:
+                        self._offset_buttons[i].turn_on()
+                        self._cache[i] = self._offset_buttons[i]._on_value
+                else:
+                    if self._cache[i] != self._offset_buttons[i]._off_value or self._force:
+                        self._offset_buttons[i].turn_off()
+                        self._cache[i] = self._offset_buttons[i]._off_value
             self._force = False
 
     def set_enabled(self, enabled):
