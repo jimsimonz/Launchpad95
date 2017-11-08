@@ -127,7 +127,7 @@ class MainSelectorComponent(ModeSelectorComponent):
 				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) %  Settings.USER_MODE_WIDTH
 				self.update()
 			elif self._main_mode_index == 2: #user mode 2  and step sequencer
-				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) %  Settings.USER_MODE_WIDTH
+				self._sub_mode_list[self._main_mode_index] = (self._sub_mode_list[self._main_mode_index] + 1) %  1
 				self.update()
 			elif self._main_mode_index == 3: #Mixer mode
 				self.update()
