@@ -1,7 +1,6 @@
 from _Framework.ClipSlotComponent import ClipSlotComponent
 from _Framework.Util import in_range
 import Live
-import base64
 class ClipSlotMK2(ClipSlotComponent):
 	
 	def update(self):
@@ -40,8 +39,7 @@ class ClipSlotMK2(ClipSlotComponent):
 				
 			if slot_or_clip.color != None:
 				if self.has_clip():
-					string_array_encoded = base64.b64encode(slot_or_clip.name.encode('UTF-16LE'))
-					string_array_as_bytes = [ord(c) for c in string_array_encoded]
+					string_array_as_bytes = button._control_surface._encode_string_to_midi(slot_or_clip.name)
 					#Live.Base.log("ClipSLotMK2- clipname: " + str(slot_or_clip.name) + " row: " + str(button.row ) + " column: " + str(button.column )) 
 					button._control_surface._send_midi((240, 0, 32, 41, 2, 24, 50) + (button.row,button.column, len(string_array_as_bytes)) + tuple(string_array_as_bytes) + (247,));
 				else:

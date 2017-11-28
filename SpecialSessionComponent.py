@@ -2,7 +2,6 @@ from _Framework.SessionComponent import SessionComponent
 from ClipSlotMK2 import ClipSlotMK2
 from _Framework.SceneComponent import SceneComponent
 import Live
-import base64
 class SpecialSessionComponent(SessionComponent):
 
 	""" Special session subclass that handles ConfigurableButtons """
@@ -59,8 +58,7 @@ class SpecialSessionComponent(SessionComponent):
 				if idx < self._num_tracks and len(tracks) > i + self._track_offset:
 					track = tracks[i + self._track_offset]
 					if track != None:
-						string_array_encoded = base64.b64encode(track.name.encode('UTF-16LE'))
-						string_array_as_bytes =  [ord(c) for c in string_array_encoded]
+						string_array_as_bytes = self._control_surface._encode_string_to_midi(track.name)
 						#Live.Base.log("SpecialSessionComponent- tracknames: " + str(track.name))  
 						self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 51) + (i, len(string_array_as_bytes)) + tuple(string_array_as_bytes) + (247,))
 					else:

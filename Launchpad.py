@@ -9,6 +9,7 @@ from MainSelectorComponent import MainSelectorComponent
 from NoteRepeatComponent import NoteRepeatComponent
 from M4LInterface import M4LInterface
 import Settings
+import base64
 
 DO_COMBINE = Live.Application.combine_apcs()  # requires 8.2 & higher
 
@@ -364,3 +365,10 @@ class Launchpad(ControlSurface):
 		self._session_automation_record_listener()
 		self._is_fixed_record_listener()
 		self._session_record_listener()
+
+	def _encode_string_to_midi(self, string_to_send):
+		string_to_send = (string_to_send[:30] + '..') if len(string_to_send) > 32 else string_to_send
+		string_array_encoded = base64.b64encode(string_to_send.encode('UTF-16LE'))
+		string_array_as_bytes =  [ord(c) for c in string_array_encoded]
+		return string_array_as_bytes
+						

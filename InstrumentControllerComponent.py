@@ -7,7 +7,6 @@ from itertools import imap
 from TrackControllerComponent import TrackControllerComponent
 from ScaleComponent import ScaleComponent,CIRCLE_OF_FIFTHS,MUSICAL_MODES,KEY_NAMES
 import Settings
-import base64
 from _Framework.InputControlElement import InputControlElement
 from _Framework.InputControlElement import MIDI_CC_TYPE, MIDI_NOTE_TYPE
 
@@ -452,8 +451,7 @@ class InstrumentControllerComponent(CompoundComponent):
 			self._restore_octave()
 			self.update()
 			#send selected track name to host
-			string_array_encoded = base64.b64encode(self._track_controller.selected_track.name.encode('UTF-16LE'))
-			string_array_as_bytes =  [ord(c) for c in string_array_encoded]
+			string_array_as_bytes = self._control_surface._encode_string_to_midi(self._track_controller.selected_track.name)
 			self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 52) + (0, len(string_array_as_bytes)) + tuple(string_array_as_bytes) + (247,))
 				
 			
