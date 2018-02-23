@@ -54,7 +54,35 @@ class SpecialSessionComponent(SessionComponent):
 
 			tracks = self.tracks_to_use()
 			idx = 0
+
+			trackroutings = []
+			trackroutings.append(len(tracks)*2)
+			trackroutings.append(self._track_offset)
+
 			for i in range(len(tracks)):
+				if tracks[i].current_output_routing == "Master":
+					trackroutings.append(126)
+					trackroutings.append(2)
+				elif tracks[i].current_output_routing == "Ext. Out":
+					chleft = chright = 0
+					if tracks[i].output_routing_channel.layout == Live.Track.RoutingChannelLayout.stereo:
+						splitname = tracks[i].output_routing_channel.display_name.split('/') 
+						chleft = int(splitname[0])
+						chright = int(splitname[1])
+					else:
+						chleft = int(tracks[i].output_routing_channel.display_name)
+					trackroutings.append(chleft)
+				
+					if tracks[i].output_routing_channel.layout == Live.Track.RoutingChannelLayout.mono:
+						trackroutings.append(1)
+					elif tracks[i].output_routing_channel.layout == Live.Track.RoutingChannelLayout.stereo:
+						trackroutings.append(2)
+					else:
+						trackroutings.append(0)
+				else:
+					trackroutings.append(127)
+					trackroutings.append(1)
+				
 				if idx < self._num_tracks and len(tracks) > i + self._track_offset:
 					track = tracks[i + self._track_offset]
 					if track != None:
@@ -72,7 +100,8 @@ class SpecialSessionComponent(SessionComponent):
 			self._osd.info[0] = " "
 			self._osd.info[1] = " "
 			self._osd.update()
-
+			#Track routing infos
+			self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 53) + tuple(trackroutings) + (247,))
 	def unlink(self):
 		if self._is_linked():
 			self._unlink()
