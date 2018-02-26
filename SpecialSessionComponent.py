@@ -67,8 +67,14 @@ class SpecialSessionComponent(SessionComponent):
 					chleft = chright = 0
 					if tracks[i].output_routing_channel.layout == Live.Track.RoutingChannelLayout.stereo:
 						splitname = tracks[i].output_routing_channel.display_name.split('/') 
-						chleft = int(splitname[0])
-						chright = int(splitname[1])
+						try:
+							if len(splitname) > 0:
+								chleft = int(splitname[0])
+							if len(splitname) > 1:
+								chright = int(splitname[1])
+						except:
+							Live.Base.log("SpecialSessionComponent- routing invalid: " +  tracks[i].output_routing_channel.display_name) 
+							chleft = 125
 					else:
 						chleft = int(tracks[i].output_routing_channel.display_name)
 					trackroutings.append(chleft)
