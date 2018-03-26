@@ -2,6 +2,27 @@ from _Framework.SessionComponent import SessionComponent
 from ClipSlotMK2 import ClipSlotMK2
 from _Framework.SceneComponent import SceneComponent
 import Live
+
+class TrackRoutingHandler():
+	def __init__(self, session_component, track):
+		self.session_component = session_component
+		self._setup_track_routing_listener(track)
+		
+	def _track_routing_changed(self):
+		self.session_component._track_routing_changed()
+
+	def _track_sub_routing_changed(self):
+		self.session_component._track_routing_changed()
+
+	def _setup_track_routing_listener(self, track):
+			try:
+				track.remove_current_output_routing_listener(self._track_routing_changed)
+				track.remove_current_output_sub_routing_listener(self._track_sub_routing_changed)
+			except:
+				 pass
+			track.add_current_output_routing_listener(self._track_routing_changed)
+			track.add_current_output_sub_routing_listener(self._track_sub_routing_changed)
+
 class SpecialSessionComponent(SessionComponent):
 
 	""" Special session subclass that handles ConfigurableButtons """
@@ -11,6 +32,7 @@ class SpecialSessionComponent(SessionComponent):
 		self._control_surface = control_surface
 		self._main_selector = main_selector
 		self._osd = None
+		self.track_routing_listeners = []
 		if self._control_surface._mk2_rgb:
 			#use custom clip colour coding : blink and pulse for trig and play 
 			SceneComponent.clip_slot_component_type = ClipSlotMK2
@@ -45,19 +67,18 @@ class SpecialSessionComponent(SessionComponent):
 	def set_osd(self, osd):
 		self._osd = osd
 
-    def _track_routing_changed(self):
-        Live.Base.log("SpecialSessionComponent- routing changed")
-        self._update_OSD()
-    
-    def _setup_track_routing_listeners(self):
-        for i in range(len(tracks)):
-            tracks[i].remove_current_output_routing_listener(self._track_routing_changed)
-            tracks[i].remove_current_output_sub_routing_listener(self._track_routing_changed)
-            
-            tracks[i].add_current_output_routing_listener(self._track_routing_changed)
-            tracks[i].add_current_output_sub_routing_listener(self._track_routing_changed)
-        
-        
+	def _track_routing_changed(self):
+		Live.Base.log("SpecialSessionComponent - routing changed")
+		self._update_OSD()
+
+	def _setup_track_routing_listeners(self):
+		tracks = self.tracks_to_use()
+		for i in range(len(tracks)):
+			if i >= len(self.track_routing_listeners):
+				self.track_routing_listeners.append(TrackRoutingHandler(self, tracks[i]))
+			else:
+				 self.track_routing_listeners[i]._setup_track_routing_listener(tracks[i])
+	
 	def _update_OSD(self):
 		if self._osd != None:
 			self._osd.mode = "Session"
@@ -121,7 +142,8 @@ class SpecialSessionComponent(SessionComponent):
 			self._osd.update()
 			#Track routing infos
 			self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 53) + tuple(trackroutings) + (247,))
-            self._setup_track_routing_listeners()
+			self._setup_track_routing_listeners()
+
 	def unlink(self):
 		if self._is_linked():
 			self._unlink()
