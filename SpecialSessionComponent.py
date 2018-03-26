@@ -68,7 +68,7 @@ class SpecialSessionComponent(SessionComponent):
 		self._osd = osd
 
 	def _track_routing_changed(self):
-		Live.Base.log("SpecialSessionComponent - routing changed")
+	#	Live.Base.log("SpecialSessionComponent - routing changed")
 		self._update_OSD()
 
 	def _setup_track_routing_listeners(self):
