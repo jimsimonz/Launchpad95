@@ -45,6 +45,19 @@ class SpecialSessionComponent(SessionComponent):
 	def set_osd(self, osd):
 		self._osd = osd
 
+    def _track_routing_changed(self):
+        Live.Base.log("SpecialSessionComponent- routing changed")
+        self._update_OSD()
+    
+    def _setup_track_routing_listeners(self):
+        for i in range(len(tracks)):
+            tracks[i].remove_current_output_routing_listener(self._track_routing_changed)
+            tracks[i].remove_current_output_sub_routing_listener(self._track_routing_changed)
+            
+            tracks[i].add_current_output_routing_listener(self._track_routing_changed)
+            tracks[i].add_current_output_sub_routing_listener(self._track_routing_changed)
+        
+        
 	def _update_OSD(self):
 		if self._osd != None:
 			self._osd.mode = "Session"
@@ -108,6 +121,7 @@ class SpecialSessionComponent(SessionComponent):
 			self._osd.update()
 			#Track routing infos
 			self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 53) + tuple(trackroutings) + (247,))
+            self._setup_track_routing_listeners()
 	def unlink(self):
 		if self._is_linked():
 			self._unlink()
