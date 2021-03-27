@@ -3,10 +3,10 @@ from _Framework.CompoundComponent import CompoundComponent
 from _Framework.SubjectSlot import subject_slot
 from _Framework.ButtonElement import ButtonElement
 from _Framework.Util import find_if, clamp
-from itertools import imap
-from TrackControllerComponent import TrackControllerComponent
-from ScaleComponent import ScaleComponent,CIRCLE_OF_FIFTHS,MUSICAL_MODES,KEY_NAMES
-import Settings
+
+from .TrackControllerComponent import TrackControllerComponent
+from .ScaleComponent import ScaleComponent,CIRCLE_OF_FIFTHS,MUSICAL_MODES,KEY_NAMES
+from . import Settings
 from _Framework.InputControlElement import InputControlElement
 from _Framework.InputControlElement import MIDI_CC_TYPE, MIDI_NOTE_TYPE
 
@@ -17,7 +17,7 @@ class InstrumentControllerComponent(CompoundComponent):
 		
 		self._macro_controllers = []
 
-		for i in xrange(8):
+		for i in range(8):
 			self._macro_controllers.append(InputControlElement(MIDI_CC_TYPE, 1, 20 + i))
 			self._macro_controllers[i].message_map_mode = self.message_map_mode
 
@@ -198,7 +198,7 @@ class InstrumentControllerComponent(CompoundComponent):
 		self.octave_map[self._track_controller.selected_track] = self._scales._octave
 
 	def _restore_octave(self):
-		if self.octave_map.has_key(self._track_controller.selected_track):
+		if self._track_controller.selected_track in self.octave_map:
 			self._scales._octave = self.octave_map[self._track_controller.selected_track]
 		else:
 			self._scales._octave = 3
@@ -492,7 +492,7 @@ class InstrumentControllerComponent(CompoundComponent):
 			if device.can_have_drum_pads:
 				return device
 			elif device.can_have_chains:
-				return find_if(bool, imap(self.find_drum_group_device, device.chains))
+				return find_if(bool, map(self.find_drum_group_device, device.chains))
 		else:
 			return None
 	
@@ -514,7 +514,7 @@ class InstrumentControllerComponent(CompoundComponent):
 			non_feedback_channel = self.base_channel + 4
 
 			# create array to keep last channel used for note.
-			note_channel = range(128)
+			note_channel = list(range(128))
 			for i in range(128):
 				note_channel[i] = self.base_channel
 
@@ -744,7 +744,7 @@ class InstrumentControllerComponent(CompoundComponent):
 
 	
 	def tuple_idx(self, target_tuple, obj):
-			for i in xrange(0, len(target_tuple)):
+			for i in range(0, len(target_tuple)):
 				if (target_tuple[i] == obj):
 					return i
 			return(False)

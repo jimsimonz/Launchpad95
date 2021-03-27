@@ -1,6 +1,6 @@
 from _Framework.DeviceComponent import DeviceComponent as LiveDeviceComponent
 from _Framework.ButtonElement import ButtonElement
-from DeviceControllerStrip import DeviceControllerStrip
+from .DeviceControllerStrip import DeviceControllerStrip
 import time
 import Live
 

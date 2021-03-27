@@ -47,8 +47,8 @@ class ScaleComponent(ControlSurfaceComponent):
 
 	def __init__(self, control_surface = None, enabled = False, mode = "diatonic", *a, **k):
 		self._layout_set = False
-		self._modus_list = [Modus(MUSICAL_MODES[v], MUSICAL_MODES[v + 1]) for v in xrange(0, len(MUSICAL_MODES), 2)]
-		self._modus_names = [MUSICAL_MODES[v] for v in xrange(0, len(MUSICAL_MODES), 2)]
+		self._modus_list = [Modus(MUSICAL_MODES[v], MUSICAL_MODES[v + 1]) for v in range(0, len(MUSICAL_MODES), 2)]
+		self._modus_names = [MUSICAL_MODES[v] for v in range(0, len(MUSICAL_MODES), 2)]
 		self._control_surface = control_surface
 		self._osd = None
 		self._modus = 0
@@ -466,7 +466,7 @@ class ScaleComponent(ControlSurfaceComponent):
 			origin = 0
 		elif self.is_diatonic:
 			origin = 0
-			for k in xrange(len(notes)):
+			for k in range(len(notes)):
 				if notes[k] >= 12:
 					origin = k - len(notes)
 					break
@@ -525,10 +525,10 @@ class MelodicPattern(object):
 
 	def __init__(self,
 	 		steps=[0, 0], 
-			scale=range(12), 
+			scale=list(range(12)), 
 			base_note=0, 
 			origin=[0, 0], 
-			valid_notes=xrange(128), 
+			valid_notes=range(128), 
 			chromatic_mode=False,
 			chromatic_gtr_mode=False,
 			diatonic_ns_mode=False,
@@ -557,7 +557,7 @@ class MelodicPattern(object):
 	def _extended_scale(self):
 		if self.chromatic_mode:
 			first_note = self.scale[0]
-			return range(first_note, first_note + 12)
+			return list(range(first_note, first_note + 12))
 		else:
 			return self.scale
 

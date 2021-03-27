@@ -1,8 +1,8 @@
 from _Framework.ControlSurfaceComponent import ControlSurfaceComponent
 from _Framework.ButtonMatrixElement import ButtonMatrixElement
-from StepSequencerComponent import StepSequencerComponent, ButtonElement, NoteSelectorComponent, LoopSelectorComponent, QUANTIZATION_NAMES
-from ScaleComponent import MUSICAL_MODES, KEY_NAMES
-from TrackControllerComponent import TrackControllerComponent
+from .StepSequencerComponent import StepSequencerComponent, ButtonElement, NoteSelectorComponent, LoopSelectorComponent, QUANTIZATION_NAMES
+from .ScaleComponent import MUSICAL_MODES, KEY_NAMES
+from .TrackControllerComponent import TrackControllerComponent
 from random import randrange
 import time
 

@@ -1,5 +1,5 @@
 from _Framework.SessionComponent import SessionComponent
-from ClipSlotMK2 import ClipSlotMK2
+from .ClipSlotMK2 import ClipSlotMK2
 from _Framework.SceneComponent import SceneComponent
 import Live
 

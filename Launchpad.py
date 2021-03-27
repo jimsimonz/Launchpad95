@@ -1,14 +1,14 @@
-from __future__ import with_statement
+
 import Live
 from _Framework.ControlSurface import ControlSurface
 from _Framework.InputControlElement import MIDI_CC_TYPE, MIDI_NOTE_TYPE
 from _Framework.ButtonElement import ButtonElement
 from _Framework.ButtonMatrixElement import ButtonMatrixElement
-from ConfigurableButtonElement import ConfigurableButtonElement
-from MainSelectorComponent import MainSelectorComponent
-from NoteRepeatComponent import NoteRepeatComponent
-from M4LInterface import M4LInterface
-import Settings
+from .ConfigurableButtonElement import ConfigurableButtonElement
+from .MainSelectorComponent import MainSelectorComponent
+from .NoteRepeatComponent import NoteRepeatComponent
+from .M4LInterface import M4LInterface
+from . import Settings
 import base64
 
 DO_COMBINE = Live.Application.combine_apcs()  # requires 8.2 & higher
@@ -48,13 +48,13 @@ class Launchpad(ControlSurface):
 
 		# second part of the __init__ after model has been identified using its challenge response
 		if self._mk2_rgb:
-			from SkinMK2 import make_skin
+			from .SkinMK2 import make_skin
 			self._skin = make_skin()
 			self._side_notes = (89, 79, 69, 59, 49, 39, 29, 19)
 			#self._drum_notes = (20, 30, 31, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126)
 			self._drum_notes = (20, 30, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126)
 		else:
-			from SkinMK1 import make_skin # @Reimport
+			from .SkinMK1 import make_skin # @Reimport
 			self._skin = make_skin()
 			self._side_notes = (8, 24, 40, 56, 72, 88, 104, 120)
 			self._drum_notes = (41, 42, 43, 44, 45, 46, 47, 57, 58, 59, 60, 61, 62, 63, 73, 74, 75, 76, 77, 78, 79, 89, 90, 91, 92, 93, 94, 95, 105, 106, 107)
@@ -294,7 +294,7 @@ class Launchpad(ControlSurface):
 	def _send_challenge(self):
 		# send challenge for all models to allow to detect which one is actually plugged
 		# mk2
-		challenge_bytes = tuple([ self._challenge >> 8 * index & 127 for index in xrange(4) ])
+		challenge_bytes = tuple([ self._challenge >> 8 * index & 127 for index in range(4) ])
 		self._send_midi((240, 0, 32, 41, 2, 24, 64) + challenge_bytes + (247,))
 		# mk1's
 		for index in range(4):

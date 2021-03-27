@@ -3,12 +3,12 @@ from _Framework.ControlSurfaceComponent import ControlSurfaceComponent
 from _Framework.CompoundComponent import CompoundComponent
 from _Framework.ButtonElement import ButtonElement
 from _Framework.Util import find_if
-from itertools import imap
-from NoteEditorComponent import NoteEditorComponent
-from TrackControllerComponent import TrackControllerComponent
+
+from .NoteEditorComponent import NoteEditorComponent
+from .TrackControllerComponent import TrackControllerComponent
 import time
-import Settings
-from ScaleComponent import ScaleComponent, MUSICAL_MODES, KEY_NAMES
+from . import Settings
+from .ScaleComponent import ScaleComponent, MUSICAL_MODES, KEY_NAMES
 
 # quantization button colours. this must remain of length 4.
 QUANTIZATION_MAP = [1, 0.5, 0.25, 0.125]  # 1/4 1/8 1/16 1/32
@@ -1263,7 +1263,7 @@ class StepSequencerComponent(CompoundComponent):
             if device.can_have_drum_pads:#device is a drum rack??
                 return device
             elif device.can_have_chains:#device is a rack??
-                return find_if(bool, imap(self.find_drum_group_device, device.chains))#recursive->returns the first drum rack item of the chain
+                return find_if(bool, map(self.find_drum_group_device, device.chains))#recursive->returns the first drum rack item of the chain
         else:
             return None
             

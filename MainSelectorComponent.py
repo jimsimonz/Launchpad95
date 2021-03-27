@@ -4,14 +4,14 @@ from _Framework.ModeSelectorComponent import ModeSelectorComponent
 from _Framework.ButtonElement import ButtonElement
 from _Framework.ButtonMatrixElement import ButtonMatrixElement
 from _Framework.SessionZoomingComponent import DeprecatedSessionZoomingComponent# noqa
-from DeviceComponent import DeviceComponent
-from SpecialSessionComponent import SpecialSessionComponent
-from InstrumentControllerComponent import InstrumentControllerComponent
-from SubSelectorComponent import SubSelectorComponent  # noqa
-from StepSequencerComponent import StepSequencerComponent
-from StepSequencerComponent2 import StepSequencerComponent2
-import Settings
-from NoteRepeatComponent import NoteRepeatComponent
+from .DeviceComponent import DeviceComponent
+from .SpecialSessionComponent import SpecialSessionComponent
+from .InstrumentControllerComponent import InstrumentControllerComponent
+from .SubSelectorComponent import SubSelectorComponent  # noqa
+from .StepSequencerComponent import StepSequencerComponent
+from .StepSequencerComponent2 import StepSequencerComponent2
+from . import Settings
+from .NoteRepeatComponent import NoteRepeatComponent
 
 class MainSelectorComponent(ModeSelectorComponent):
 
