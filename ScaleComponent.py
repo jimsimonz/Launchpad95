@@ -1,6 +1,5 @@
 from _Framework.ControlSurfaceComponent import ControlSurfaceComponent
 
-=======
 #fix for python3
 try:
     xrange

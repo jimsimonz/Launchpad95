@@ -236,7 +236,7 @@ class NoteSelectorComponent(ControlSurfaceComponent):
                 if self._clip == None:
                     self._offset_buttons[i].set_light("DefaultButton.Disabled")
                     self._offset_buttons[i].set_enabled(True)
-                else
+                else:
                     note = self._root_note + i
                     if self.is_drumrack:
                         if self._drum_group_device.drum_pads[note].chains:

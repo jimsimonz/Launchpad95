@@ -97,9 +97,6 @@ class Launchpad(ControlSurface):
 		self._init_done = True
 
 		# second part of the __init__ after model has been identified using its challenge response
-		if self._mk2_rgb:
-		
-		# second part of the __init__ after model has been identified using its challenge response
 		if self._mk3_rgb or self._lpx:
 			from .SkinMK2 import make_skin
 			self._skin = make_skin()
@@ -184,29 +181,13 @@ class Launchpad(ControlSurface):
 			else:
 				self.log_message("LaunchPad95 Loaded !")
 		
-		song = self.song()
-		song.add_record_mode_listener(self._record_mode_listener)
-		song.add_is_playing_listener(self._is_playing_listener)
-		song.add_metronome_listener(self._metronome_listener)
-		song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
-		song.add_session_automation_record_listener(self._session_automation_record_listener)
-		song.add_session_record_listener(self._session_record_listener)
-
-		  
-			self._suppress_session_highlight = False
-			self.set_highlighting_session_component(self._selector.session_component())
-			# due to our 2 stage init, we need to rebuild midi map 
-			self.request_rebuild_midi_map()
-			# and request update 
-			self._selector.update()
-			if self._lpx:
-				self.log_message("LaunchPad95 (LPX) Loaded !")
-			elif self._mk3_rgb:
-				self.log_message("LaunchPad95 (mk3) Loaded !")
-			elif self._mk2_rgb:
-				self.log_message("LaunchPad95 (mk2) Loaded !")
-			else:
-				self.log_message("LaunchPad95 (classic) Loaded !")
+			song = self.song()
+			song.add_record_mode_listener(self._record_mode_listener)
+			song.add_is_playing_listener(self._is_playing_listener)
+			song.add_metronome_listener(self._metronome_listener)
+			song.add_midi_recording_quantization_listener(self._midi_recording_quantization_listener)
+			song.add_session_automation_record_listener(self._session_automation_record_listener)
+			song.add_session_record_listener(self._session_record_listener)
 
 	def disconnect(self):
 		self._suppress_send_midi = True
