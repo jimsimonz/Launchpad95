@@ -488,7 +488,8 @@ class Launchpad(ControlSurface):
 		self._session_record_listener()
 
 	def _encode_string_to_midi(self, string_to_send):
+		self.log_message("encord string to midi is " + string_to_send)
 		string_to_send = (string_to_send[:30] + '..') if len(string_to_send) > 32 else string_to_send
 		string_array_encoded = base64.b64encode(string_to_send.encode('UTF-16LE'))
-		string_array_as_bytes =  [ord(c) for c in string_array_encoded]
-		return string_array_as_bytes
+		#string_array_as_bytes =  [c) for c in string_array_encoded]
+		return string_array_encoded
