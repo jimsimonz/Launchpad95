@@ -138,11 +138,11 @@ class Launchpad(ControlSurface):
 				matrix.add_row(tuple(button_row))
 
 			if self._mk3_rgb or self._lpx :
-				top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 91 + index, skin = self._skin) for index in range(8)]
-				side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, self._side_notes[index], skin = self._skin) for index in range(8)]
+				top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 91 + index, 0, 0, skin = self._skin) for index in range(8)]
+				side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, self._side_notes[index], 0, 0, skin = self._skin) for index in range(8)]
 			else:
-				top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 104 + index, skin = self._skin) for index in range(8)]
-				side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, self._side_notes[index], skin = self._skin) for index in range(8)]
+				top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 104 + index, 0, 0, skin = self._skin) for index in range(8)]
+				side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, self._side_notes[index], 0, 0,skin = self._skin) for index in range(8)]
 				
 			top_buttons[0].name = 'Bank_Select_Up_Button'
 			top_buttons[1].name = 'Bank_Select_Down_Button'
