@@ -37,7 +37,8 @@ class SpecialSessionComponent(SessionComponent):
 			#use custom clip colour coding : blink and pulse for trig and play 
 			SceneComponent.clip_slot_component_type = ClipSlotMK2
 		SessionComponent.__init__(self, num_tracks = num_tracks, num_scenes = num_scenes, enable_skinning = True, name='Session', is_root=True)
-		if self._control_surface._mk2_rgb:
+
+		if self._control_surface._lpx or self._control_surface._mk3_rgb or self._control_surface._mk2_rgb:
 			from .ColorsMK2 import CLIP_COLOR_TABLE, RGB_COLOR_TABLE
 			self.set_rgb_mode(CLIP_COLOR_TABLE, RGB_COLOR_TABLE)
 
@@ -135,6 +136,15 @@ class SpecialSessionComponent(SessionComponent):
 					self._osd.attributes[idx] = " "
 				else:
 					self._control_surface._send_midi((240, 0, 32, 41, 2, 24, 51) + (i, 1) + (0, 247,))
+			
+			for i in range(len(tracks)):
+				if idx < self._num_tracks and len(tracks) > i + self._track_offset:
+					track = tracks[i + self._track_offset]
+					if track != None:
+						self._osd.attribute_names[idx] = str(track.name)
+					else:
+						self._osd.attribute_names[idx] = " "
+					self._osd.attributes[idx] = " "
 				idx += 1
 
 			self._osd.info[0] = " "

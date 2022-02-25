@@ -109,7 +109,9 @@ class DeviceComponent(LiveDeviceComponent):
 		if self._matrix:
 			self._sliders = []
 			for column in range(self._matrix.width()):
+			# JIM: taken my version here which passess the control_surface
 				slider = DeviceControllerStrip(tuple([self._matrix.get_button(column, (self._matrix.height() - 1 - row)) for row in range(self._matrix.height())]),self._control_surface)
+				slider._parent = self
 				self._sliders.append(slider)
 			self._sliders = tuple(self._sliders)
 			self.set_parameter_controls(self._sliders)
@@ -511,7 +513,7 @@ class DeviceComponent(LiveDeviceComponent):
 			if(self._prev_device_button != None):
 				self._prev_device_button.set_on_off_values("Mode.Device.On", "Mode.Device.Off")
 				
-				if(len(self.selected_track().devices) > 0 and self.selected_device_idx > 0 and not self._is_locked_to_device):
+				if self.selected_track().devices!=None and (len(self.selected_track().devices) > 0 and self.selected_device_idx > 0 and not self._is_locked_to_device):
 					self._prev_device_button.turn_on()
 				else:
 					self._prev_device_button.turn_off()

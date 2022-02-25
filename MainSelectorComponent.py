@@ -12,6 +12,10 @@ from .StepSequencerComponent import StepSequencerComponent
 from .StepSequencerComponent2 import StepSequencerComponent2
 from . import Settings
 from .NoteRepeatComponent import NoteRepeatComponent
+try:
+    exec("from .Settings import Settings")
+except ImportError:
+    exec("from .Settings import *")
 
 class MainSelectorComponent(ModeSelectorComponent):
 

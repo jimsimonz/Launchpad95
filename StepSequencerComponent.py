@@ -9,6 +9,19 @@ from .TrackControllerComponent import TrackControllerComponent
 import time
 from . import Settings
 from .ScaleComponent import ScaleComponent, MUSICAL_MODES, KEY_NAMES
+try:
+    from itertools import imap
+except ImportError:
+    # Python 3...
+    imap=map
+from .NoteEditorComponent import NoteEditorComponent
+from .TrackControllerComponent import TrackControllerComponent
+import time
+from .ScaleComponent import ScaleComponent, MUSICAL_MODES, KEY_NAMES
+try:
+    exec("from .Settings import Settings")
+except ImportError:
+    exec("from .Settings import *")
 
 # quantization button colours. this must remain of length 4.
 QUANTIZATION_MAP = [1, 0.5, 0.25, 0.125]  # 1/4 1/8 1/16 1/32
@@ -220,47 +233,51 @@ class NoteSelectorComponent(ControlSurfaceComponent):
     def _update_matrix(self):
         if self._enable_offset_button and self.is_enabled():
             for i in range(len(self._offset_buttons)):
-                note = self._root_note + i
-                if self.is_drumrack:
-                    if self._drum_group_device.drum_pads[note].chains:
-                        self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected","DrumGroup.PadFilled")
+                if self._clip == None:
+                    self._offset_buttons[i].set_light("DefaultButton.Disabled")
+                    self._offset_buttons[i].set_enabled(True)
+                else
+                    note = self._root_note + i
+                    if self.is_drumrack:
+                        if self._drum_group_device.drum_pads[note].chains:
+                            self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected","DrumGroup.PadFilled")
+                        else:
+                            self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected", "DrumGroup.PadEmpty")
                     else:
-                        self._offset_buttons[i].set_on_off_values("DrumGroup.PadSelected", "DrumGroup.PadEmpty")
-                else:
-                    if self._scale != None:
-                        if i % 12 == self._scale[0]:
-                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Root")
-                        elif i % 12 == self._scale[2] or i % 12 == self._scale[4]:
-                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Highlight")
-                        elif self._scale != None and i % 12 in self._scale:
-                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.InScale")
+                        if self._scale != None:
+                            if i % 12 == self._scale[0]:
+                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Root")
+                            elif i % 12 == self._scale[2] or i % 12 == self._scale[4]:
+                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.Highlight")
+                            elif self._scale != None and i % 12 in self._scale:
+                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.InScale")
+                            else:
+                                self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.OutOfScale")
                         else:
                             self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.OutOfScale")
+
+                    if self._is_velocity_shifted and not self._step_sequencer._is_locked:
+                        #self._offset_buttons[i].force_next_send()
+                        #self._offset_buttons[i].turn_off()
+                        self._offset_buttons[i].set_enabled(False)
+                        self._offset_buttons[i].set_channel(11)
+                        self._offset_buttons[i].set_identifier(note)
                     else:
-                        self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Selected", "Note.Pads.OutOfScale")
+                        #self._offset_buttons[i].force_next_send()
+                        self._offset_buttons[i].set_enabled(True)
+                        self._offset_buttons[i].use_default_message()
 
-                if self._is_velocity_shifted and not self._step_sequencer._is_locked:
-                    #self._offset_buttons[i].force_next_send()
-                    #self._offset_buttons[i].turn_off()
-                    self._offset_buttons[i].set_enabled(False)
-                    self._offset_buttons[i].set_channel(11)
-                    self._offset_buttons[i].set_identifier(note)
-                else:
-                    #self._offset_buttons[i].force_next_send()
-                    self._offset_buttons[i].set_enabled(True)
-                    self._offset_buttons[i].use_default_message()
+                        if self._playhead != None and self.note_is_playing(self._clip, self._note_cache, note, self._playhead):
+                            self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Playing","StepSequencer.NoteSelector.Playing")
 
-                    if self._playhead != None and self.note_is_playing(self._clip, self._note_cache, note, self._playhead):
-                        self._offset_buttons[i].set_on_off_values("StepSequencer.NoteSelector.Playing","StepSequencer.NoteSelector.Playing")
-
-                if self.selected_note == note:
-                    if self._cache[i] != self._offset_buttons[i]._on_value or self._force:
-                        self._offset_buttons[i].turn_on()
-                        self._cache[i] = self._offset_buttons[i]._on_value
-                else:
-                    if self._cache[i] != self._offset_buttons[i]._off_value or self._force:
-                        self._offset_buttons[i].turn_off()
-                        self._cache[i] = self._offset_buttons[i]._off_value
+                    if self.selected_note == note:
+                        if self._cache[i] != self._offset_buttons[i]._on_value or self._force:
+                            self._offset_buttons[i].turn_on()
+                            self._cache[i] = self._offset_buttons[i]._on_value
+                    else:
+                        if self._cache[i] != self._offset_buttons[i]._off_value or self._force:
+                            self._offset_buttons[i].turn_off()
+                            self._cache[i] = self._offset_buttons[i]._off_value
             self._force = False
 
     def set_enabled(self, enabled):
@@ -363,10 +380,9 @@ class NoteSelectorComponent(ControlSurfaceComponent):
 
     def set_selected_note(self, selected_note):
         if self.is_drumrack:
-            self._root_note = ((selected_note + 12) / 16 - 1) * 16 + 4
+            self._root_note = int((selected_note + 12) / 16 - 1) * 16 + 4
             self._offset = (selected_note - self._root_note + 16) % 16
         else:
-            self._root_note = ((selected_note - self._key) / 12) * 12 + self._key
             self._offset = (selected_note + 12 - self._root_note) % 12
         
         self._step_sequencer._scale_updated()
@@ -589,7 +605,7 @@ class LoopSelectorComponent(ControlSurfaceComponent):
                     #is the button in loop range
                     in_loop = (i * self._blocksize * self._quantization < self._loop_end) and (i * self._blocksize * self._quantization >= self._loop_start)
                     #is the playing position is inside the block represented by the button
-                    playing = self._playhead >= i * self._blocksize * self._quantization and self._playhead < (i + 1) * self._blocksize * self._quantization
+                    playing = self._playhead != None and self._playhead >= i * self._blocksize * self._quantization and self._playhead < (i + 1) * self._blocksize * self._quantization
                     #is this block selected (green)
                     selected = i == self.block
                     if in_loop:
@@ -981,7 +997,7 @@ class StepSequencerComponent(CompoundComponent):
                     keys[i] = self._note_selector._root_note + self._note_selector._offset + i
             else:
                 for i in range(8):
-                    keys[i] = self._note_selector._root_note + self._note_selector._scale[(i + idx) % self._note_selector._scale_length] + ((i + idx) / self._note_selector._scale_length) * 12
+                    keys[i] = self._note_selector._root_note + self._note_selector._scale[(i + idx) % self._note_selector._scale_length] + int((i + idx) / self._note_selector._scale_length) * 12
                     key_is_root_note[i] = (keys[i] + 12) % 12 == self._note_selector._key
                     key_is_in_scale[i] = True
         else:
@@ -1263,7 +1279,7 @@ class StepSequencerComponent(CompoundComponent):
             if device.can_have_drum_pads:#device is a drum rack??
                 return device
             elif device.can_have_chains:#device is a rack??
-                return find_if(bool, map(self.find_drum_group_device, device.chains))#recursive->returns the first drum rack item of the chain
+                return find_if(bool, imap(self.find_drum_group_device, device.chains))#recursive->returns the first drum rack item of the chain
         else:
             return None
             
@@ -1298,7 +1314,7 @@ class StepSequencerComponent(CompoundComponent):
             if value > 0:
                 self._mode_backup = self._mode
                 if self._scale_selector != None and self._note_selector != None:
-                    self._scale_selector.set_octave(self._note_selector._root_note / 12)
+                    self._scale_selector.set_octave(int(self._note_selector._root_note / 12))
                     self._scale_selector.set_key(self._note_selector._key)
                     self.set_mode(STEPSEQ_MODE_SCALE_EDIT)
             else:
@@ -1594,5 +1610,3 @@ class StepSequencerComponent(CompoundComponent):
                 pass
             except RuntimeError:
                 pass
-
-    

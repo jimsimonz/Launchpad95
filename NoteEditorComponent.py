@@ -130,7 +130,7 @@ class NoteEditorComponent(ControlSurfaceComponent):
 		if self.is_multinote:
 			self._page = page
 		else:
-			self._page = page / 4  # 4 lines per note (32 steps seq)
+			self._page = int(page / 4)  # 4 lines per note (32 steps seq)
 
 	def set_clip(self, clip):
 		self._clip = clip
@@ -165,7 +165,7 @@ class NoteEditorComponent(ControlSurfaceComponent):
 		
 	# Displays 3 buttons for the root of the scale and 1 for the in scale notes 	
 	def _display_note_markers(self):# (out of scale notes buttons are dark) OK
-		for i in range(0, self.height / self.number_of_lines_per_note):
+		for i in range(0, int(self.height / self.number_of_lines_per_note)):
 			if self._key_index_is_root_note[i]:
 				for j in range(0, self.number_of_lines_per_note):
 					self._grid_back_buffer[0][self.height - i * self.number_of_lines_per_note - j - 1] = "StepSequencer.NoteEditor.NoteMarker"
@@ -343,8 +343,7 @@ class NoteEditorComponent(ControlSurfaceComponent):
 
 		if self.is_enabled() and self._clip == None:
 			self._stepsequencer.create_clip()
-
-		if self.is_enabled() and self._clip != None:
+		elif self.is_enabled() and self._clip != None:
 			if value != 0 or not is_momentary: #if NOTE_ON or button is toggle
 				if(self._is_velocity_shifted):
 					self._velocity_notes_pressed = self._velocity_notes_pressed + 1 #Just changing some note velocity
@@ -353,7 +352,7 @@ class NoteEditorComponent(ControlSurfaceComponent):
 
 				if self.is_multinote: # Calculate note pitch and time for notes 
 					time = self.quantization * (self._page * self.width * self.number_of_lines_per_note + x + (y % self.number_of_lines_per_note * self.width))
-					pitch = self._key_indexes[8 / self.number_of_lines_per_note - 1 - y / self.number_of_lines_per_note]
+					pitch = self._key_indexes[int(8 / self.number_of_lines_per_note - 1 - y / self.number_of_lines_per_note)]
 				else:
 					time = self.quantization * (self._page * self.width * self.number_of_lines_per_note + y * self.width + x)
 					pitch = self._key_indexes[0]

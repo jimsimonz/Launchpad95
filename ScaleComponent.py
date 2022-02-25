@@ -1,5 +1,12 @@
 from _Framework.ControlSurfaceComponent import ControlSurfaceComponent
 
+=======
+#fix for python3
+try:
+    xrange
+except NameError:
+    xrange = range
+
 KEY_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 CIRCLE_OF_FIFTHS = [7 * k % 12 for k in range(12)]
 # KEY_CENTERS = CIRCLE_OF_FIFTHS[0:6] + CIRCLE_OF_FIFTHS[-1:5:-1]
@@ -47,8 +54,8 @@ class ScaleComponent(ControlSurfaceComponent):
 
 	def __init__(self, control_surface = None, enabled = False, mode = "diatonic", *a, **k):
 		self._layout_set = False
-		self._modus_list = [Modus(MUSICAL_MODES[v], MUSICAL_MODES[v + 1]) for v in range(0, len(MUSICAL_MODES), 2)]
-		self._modus_names = [MUSICAL_MODES[v] for v in range(0, len(MUSICAL_MODES), 2)]
+		self._modus_list = [Modus(MUSICAL_MODES[v], MUSICAL_MODES[v + 1]) for v in xrange(0, len(MUSICAL_MODES), 2)]
+		self._modus_names = [MUSICAL_MODES[v] for v in xrange(0, len(MUSICAL_MODES), 2)]
 		self._control_surface = control_surface
 		self._osd = None
 		self._modus = 0
@@ -217,7 +224,13 @@ class ScaleComponent(ControlSurfaceComponent):
 				
 				elif row==1:
 					if self.is_drumrack:
-						button.set_light("DefaultButton.Disabled")
+						if col==7:
+							if self._quick_scale:
+								button.set_light("Scale.QuickScale.On")
+							else:
+								button.set_light("Scale.QuickScale.Off")
+						else:
+							button.set_light("DefaultButton.Disabled")
 					else:
 						if col==0 or col==1 or col==3 or col==4 or col==5:
 							if self._key == self._white_notes_index[col]+1:
@@ -466,7 +479,7 @@ class ScaleComponent(ControlSurfaceComponent):
 			origin = 0
 		elif self.is_diatonic:
 			origin = 0
-			for k in range(len(notes)):
+			for k in xrange(len(notes)):
 				if notes[k] >= 12:
 					origin = k - len(notes)
 					break
@@ -525,10 +538,10 @@ class MelodicPattern(object):
 
 	def __init__(self,
 	 		steps=[0, 0], 
-			scale=list(range(12)), 
+			scale=range(12), 
 			base_note=0, 
 			origin=[0, 0], 
-			valid_notes=range(128), 
+			valid_notes=xrange(128), 
 			chromatic_mode=False,
 			chromatic_gtr_mode=False,
 			diatonic_ns_mode=False,
@@ -557,7 +570,7 @@ class MelodicPattern(object):
 	def _extended_scale(self):
 		if self.chromatic_mode:
 			first_note = self.scale[0]
-			return list(range(first_note, first_note + 12))
+			return range(first_note, first_note + 12)
 		else:
 			return self.scale
 
@@ -572,7 +585,7 @@ class MelodicPattern(object):
 		index = self.steps[0] * (self.origin[0] + x) + self.steps[1] * (self.origin[1] + y)
 		if self.chromatic_gtr_mode and y > 3:
 			index = index - 1
-		octave = index / scale_size
+		octave = int(index / scale_size)
 		note = scale[index % scale_size]
 		return (octave, note)
 

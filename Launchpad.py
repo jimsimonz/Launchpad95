@@ -1,4 +1,4 @@
-
+from __future__ import with_statement
 import Live
 from _Framework.ControlSurface import ControlSurface
 from _Framework.InputControlElement import MIDI_CC_TYPE, MIDI_NOTE_TYPE
@@ -17,6 +17,54 @@ class Launchpad(ControlSurface):
 
 	_active_instances = []
 
+try:
+    exec("from .Settings import Settings")
+except ImportError:
+    exec("from .Settings import *")
+
+#fix for python3
+try:
+    xrange
+except NameError:
+    xrange = range
+
+DO_COMBINE = Live.Application.combine_apcs()  # requires 8.2 & higher
+
+
+LP_MINI_MK3_FAMILY_CODE = (19, 1)
+LP_MINI_MK3_ID = 13
+LP_X_FAMILY_CODE = (3, 1)
+LP_X_ID = 12
+
+#LAYOUT_COMMAND = 0
+#FADER_COMMAND = 1
+#NOTE_LAYOUT_COMMAND = 15
+
+SYSEX_START = 240
+SYSEX_END = 247
+SYSEX_GENERAL_INFO = 6
+SYSEX_NON_REALTIME = 126
+SYSEX_IDENTITY_REQUEST_ID = 1
+#SYSEX_IDENTITY_RESPONSE_ID = 2
+SYSEX_IDENTITY_REQUEST_MESSAGE = (SYSEX_START,SYSEX_NON_REALTIME,127,SYSEX_GENERAL_INFO,SYSEX_IDENTITY_REQUEST_ID,SYSEX_END)
+NOVATION_MANUFACTURER_ID = (0, 32, 41)
+FIRMWARE_MODE_COMMAND = 16
+#DAW_MODE = 1
+STANDALONE_MODE = 0
+#SESSION_LAYOUT = 0
+#NOTE_LAYOUT = 1
+#KEYS_LAYOUT = 5
+#FADERS_LAYOUT = 13
+#SCALE_LAYOUT = 0
+#DRUM_LAYOUT = 1
+
+STD_MSG_HEADER = (SYSEX_START,) + NOVATION_MANUFACTURER_ID + (2, )
+
+
+class Launchpad(ControlSurface):
+
+	_active_instances = []
+	
 	def __init__(self, c_instance):
 		ControlSurface.__init__(self, c_instance)
 		live = Live.Application.get_application()
@@ -31,15 +79,17 @@ class Launchpad(ControlSurface):
 			self._suppress_session_highlight = True
 			self._suggested_input_port = ("InToLive")
 			self._suggested_output_port = ("OutOfLive")
-			self._control_is_with_automap = False
-			self._user_byte_write_button = None
-			self._config_button = None
-			self._wrote_user_byte = False
-			self._challenge = Live.Application.get_random_int(0, 400000000) & 2139062143
-			self._init_done = False
+		self._lpx = False
+		self._mk3_rgb = False
+		self._control_is_with_automap = False
+		self._user_byte_write_button = None
+		self._config_button = None
+		self._wrote_user_byte = False
+		self._challenge = Live.Application.get_random_int(0, 400000000) & 2139062143
+		self._init_done = False
 		# caller will send challenge and we will continue as challenge is received.
-
-
+		
+			
 	def init(self):
 		#skip init if already done.
 		if self._init_done:
@@ -48,6 +98,14 @@ class Launchpad(ControlSurface):
 
 		# second part of the __init__ after model has been identified using its challenge response
 		if self._mk2_rgb:
+		
+		# second part of the __init__ after model has been identified using its challenge response
+		if self._mk3_rgb or self._lpx:
+			from .SkinMK2 import make_skin
+			self._skin = make_skin()
+			self._side_notes = (89, 79, 69, 59, 49, 39, 29, 19)
+			self._drum_notes = (20, 30, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126)
+		elif self._mk2_rgb:
 			from .SkinMK2 import make_skin
 			self._skin = make_skin()
 			self._side_notes = (89, 79, 69, 59, 49, 39, 29, 19)
@@ -58,7 +116,7 @@ class Launchpad(ControlSurface):
 			self._skin = make_skin()
 			self._side_notes = (8, 24, 40, 56, 72, 88, 104, 120)
 			self._drum_notes = (41, 42, 43, 44, 45, 46, 47, 57, 58, 59, 60, 61, 62, 63, 73, 74, 75, 76, 77, 78, 79, 89, 90, 91, 92, 93, 94, 95, 105, 106, 107)
-
+		
 		with self.component_guard():
 			is_momentary = True
 			self._config_button = ButtonElement(is_momentary, MIDI_CC_TYPE, 0, 0, optimized_send_midi=False)
@@ -72,7 +130,7 @@ class Launchpad(ControlSurface):
 			for row in range(8):
 				button_row = []
 				for column in range(8):
-					if self._mk2_rgb:
+					if self._mk2_rgb or self._mk3_rgb or self._lpx:
 						# for mk2 buttons are assigned "top to bottom"
 						midi_note = (81 - (10 * row)) + column
 					else:
@@ -82,8 +140,13 @@ class Launchpad(ControlSurface):
 					button_row.append(button)
 				matrix.add_row(tuple(button_row))
 
-			top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 104 + index,0,0, skin = self._skin) for index in range(8)]
-			side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, self._side_notes[index],0,0, skin = self._skin) for index in range(8)]
+			if self._mk3_rgb or self._lpx :
+				top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 91 + index, skin = self._skin) for index in range(8)]
+				side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, self._side_notes[index], skin = self._skin) for index in range(8)]
+			else:
+				top_buttons = [ConfigurableButtonElement(is_momentary, MIDI_CC_TYPE, 0, 104 + index, skin = self._skin) for index in range(8)]
+				side_buttons = [ConfigurableButtonElement(is_momentary, MIDI_NOTE_TYPE, 0, self._side_notes[index], skin = self._skin) for index in range(8)]
+				
 			top_buttons[0].name = 'Bank_Select_Up_Button'
 			top_buttons[1].name = 'Bank_Select_Down_Button'
 			top_buttons[2].name = 'Bank_Select_Left_Button'
@@ -129,6 +192,22 @@ class Launchpad(ControlSurface):
 		song.add_session_automation_record_listener(self._session_automation_record_listener)
 		song.add_session_record_listener(self._session_record_listener)
 
+		  
+			self._suppress_session_highlight = False
+			self.set_highlighting_session_component(self._selector.session_component())
+			# due to our 2 stage init, we need to rebuild midi map 
+			self.request_rebuild_midi_map()
+			# and request update 
+			self._selector.update()
+			if self._lpx:
+				self.log_message("LaunchPad95 (LPX) Loaded !")
+			elif self._mk3_rgb:
+				self.log_message("LaunchPad95 (mk3) Loaded !")
+			elif self._mk2_rgb:
+				self.log_message("LaunchPad95 (mk2) Loaded !")
+			else:
+				self.log_message("LaunchPad95 (classic) Loaded !")
+
 	def disconnect(self):
 		self._suppress_send_midi = True
 		for control in self.controls:
@@ -140,15 +219,24 @@ class Launchpad(ControlSurface):
 			self._config_button.remove_value_listener(self._config_value)
 		ControlSurface.disconnect(self)
 		self._suppress_send_midi = False
-		if self._mk2_rgb:
+		if self._lpx:
+			# lpx needs disconnect string sent
+			self._send_midi(STD_MSG_HEADER + (LP_X_ID, 14, 0, SYSEX_END))
+			self._send_midi(STD_MSG_HEADER + (LP_X_ID, FIRMWARE_MODE_COMMAND, STANDALONE_MODE, SYSEX_END))
+		elif self._mk3_rgb:
+			# launchpad mk2 needs disconnect string sent
+			self._send_midi(STD_MSG_HEADER + (LP_MINI_MK3_ID, 14, 0, SYSEX_END))
+			self._send_midi(STD_MSG_HEADER + (LP_MINI_MK3_ID, FIRMWARE_MODE_COMMAND, STANDALONE_MODE, SYSEX_END))
+		elif self._mk2_rgb:
 			# launchpad mk2 needs disconnect string sent
 			self._send_midi((240, 0, 32, 41, 2, 24, 64, 247))
 		if self._config_button != None:
 			self._config_button.send_value(32)#Send enable flashing led config message to LP
 			self._config_button.send_value(0)
 			self._config_button = None
-		self._user_byte_write_button.send_value(0)
-		self._user_byte_write_button = None
+		if self._user_byte_write_button != None:
+			self._user_byte_write_button.send_value(0)
+			self._user_byte_write_button = None
 
 	def _combine_active_instances():
 		support_devices = False
@@ -262,6 +350,56 @@ class Launchpad(ControlSurface):
 		if midi_bytes[8] == self.ALIVEINVR_SYSEX_COMMAND.TRANSPORT:
 			self.handle_aliveinvr_transport_command(midi_bytes[9], midi_bytes[10])
 
+		if len(midi_bytes) >= 10 and midi_bytes[:8] == (240, 126, 0, 6, 2, 0, 32, 41): #0,32,41=novation
+			if len(midi_bytes) >= 12 and midi_bytes[8:10] == (19,1):
+				self._mk3_rgb = True
+				#programmer mode
+				self._send_midi(STD_MSG_HEADER + (LP_MINI_MK3_ID, 14, 1, SYSEX_END))
+				#led feedback: internal off, external on
+				self._send_midi(STD_MSG_HEADER + (LP_MINI_MK3_ID, 10, 0, 1, SYSEX_END))
+				#disable sleep mode
+				self._send_midi(STD_MSG_HEADER + (LP_MINI_MK3_ID, 9, 1, SYSEX_END))
+				self._suppress_send_midi = False
+				self.set_enabled(True)
+				self.init()
+			elif len(midi_bytes) >= 12 and midi_bytes[8:10] == (3,1):
+				self._lpx = True
+				#programmer mode
+				self._send_midi(STD_MSG_HEADER + (LP_X_ID, 14, 1, SYSEX_END))
+				#led feedback: internal off, external on
+				self._send_midi(STD_MSG_HEADER + (LP_X_ID, 10, 0, 1, SYSEX_END))
+				#disable sleep mode
+				self._send_midi(STD_MSG_HEADER + (LP_X_ID, 9, 1, SYSEX_END))
+				self._suppress_send_midi = False
+				self.set_enabled(True)
+				self.init()
+			else:
+				ControlSurface.handle_sysex(self,midi_bytes)
+				#self.log_message("OTHER NOVATION")
+
+		# MK2 has different challenge and params
+		elif len(midi_bytes) == 10 and midi_bytes[:7] == (240, 0, 32, 41, 2, 24, 64):
+			response = int(midi_bytes[7])
+			response += int(midi_bytes[8]) << 8
+			if response == Live.Application.encrypt_challenge2(self._challenge):
+				self.log_message("Challenge Response ok (mk2)")
+				self._mk2_rgb = True
+				self._suppress_send_midi = False
+				self.set_enabled(True)
+				self.init()
+		#MK1 Challenge
+		elif len(midi_bytes) == 8 and midi_bytes[1:5] == (0, 32, 41, 6):
+			response = int(midi_bytes[5])
+			response += int(midi_bytes[6]) << 8
+			if response == Live.Application.encrypt_challenge2(self._challenge):
+				self.log_message("Challenge Response ok (mk1)")
+				self._mk2_rgb = False
+				self.init()
+				self._suppress_send_midi = False
+				self.set_enabled(True)
+		else:
+			ControlSurface.handle_sysex(self,midi_bytes)
+		
 
 	def build_midi_map(self, midi_map_handle):
 		ControlSurface.build_midi_map(self, midi_map_handle)
@@ -293,8 +431,10 @@ class Launchpad(ControlSurface):
 
 	def _send_challenge(self):
 		# send challenge for all models to allow to detect which one is actually plugged
+		# mk3 and LPX
+		self._send_midi(SYSEX_IDENTITY_REQUEST_MESSAGE)
 		# mk2
-		challenge_bytes = tuple([ self._challenge >> 8 * index & 127 for index in range(4) ])
+		challenge_bytes = tuple([ self._challenge >> 8 * index & 127 for index in xrange(4) ])
 		self._send_midi((240, 0, 32, 41, 2, 24, 64) + challenge_bytes + (247,))
 		# mk1's
 		for index in range(4):
@@ -371,4 +511,3 @@ class Launchpad(ControlSurface):
 		string_array_encoded = base64.b64encode(string_to_send.encode('UTF-16LE'))
 		string_array_as_bytes =  [ord(c) for c in string_array_encoded]
 		return string_array_as_bytes
-						

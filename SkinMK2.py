@@ -36,6 +36,9 @@ class Colors:
 		class Mixer:
 			On = Rgb.MINT
 			Off = Rgb.MINT_THIRD
+		class Track: #??
+			On = Rgb.MINT
+			Off = Rgb.MINT_THIRD
 	
 	class Session:
 		#scene
@@ -167,7 +170,7 @@ class Colors:
 				On =  Rgb.PURPLE
 				Off = Rgb.PURPLE_THIRD
 		class LoopSelector:
-			SelectedPlaying = Rgb.GREEN
+			SelectedPlaying = Rgb.PURPLE
 			Playing = Rgb.PURPLE_HALF
 			Selected = Rgb.BLUE
 			InLoop = Rgb.BLUE_THIRD
@@ -192,6 +195,7 @@ class Colors:
 			Velocity3 = Rgb.GREEN_THIRD
 			Muted = Rgb.DARK_GREY
 			Playing = Rgb.PURPLE
+			Velocity4 = Rgb.AMBER
 			Metronome = Rgb.BLUE
 			NoteMarker = Rgb.AMBER
 			PageMarker = Rgb.YELLOW
